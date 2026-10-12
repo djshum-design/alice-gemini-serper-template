@@ -2,9 +2,9 @@ const DEFAULT_MODEL = "openai/gpt-6.1-sol";
 const MAX_HISTORY_MESSAGES = 8;
 const MAX_HISTORY_MESSAGE_CHARS = 1200;
 const MAX_ALICE_TEXT = 1024;
-const TOTAL_RESPONSE_BUDGET_MS = 3600;
+const TOTAL_RESPONSE_BUDGET_MS = 16000;
 const SERPER_TIMEOUT_MS = 600;
-const NORDROUTER_TIMEOUT_MS = 3000;
+const NORDROUTER_TIMEOUT_MS = 15000;
 const SYSTEM_PROMPT = [
   "Ты — полезный голосовой помощник в навыке Яндекс Алисы.",
   "Отвечай естественно, по-русски, кратко и так, чтобы ответ было удобно слушать.",
@@ -72,7 +72,7 @@ async function askNordRouter(text, history, searchContext, timeoutMs) {
   }))];
   const prompt = searchContext ? text + "\n\nРезультаты поиска в интернете:\n" + searchContext + "\nИспользуй их только там, где они относятся к вопросу." : text;
   messages.push({ role: "user", content: prompt });
-  const { response, data } = await fetchJson("https://global-api.nordrouter.com/v1/chat/completions", {
+  const { response, data } = await fetchJson("https://nordrouter.com/v1/chat/completions", {
     method: "POST", headers: { "Content-Type": "application/json", Authorization: "Bearer " + key },
     body: JSON.stringify({ model, messages, max_tokens: 240, reasoning_effort: "low", stream: false })
   }, Math.min(NORDROUTER_TIMEOUT_MS, timeoutMs));
