@@ -1,13 +1,10 @@
 {
-  "name": "alice-gemini-serper-template",
+  "name": "alice-gpt-nordrouter",
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Minimal Vercel webhook for a Yandex Alice skill powered by Gemini with optional Serper web search",
-  "engines": {
-    "node": ">=22"
-  },
-  "scripts": {
-    "test": "node --test"
-  }
+  "description": "Alice skill with GPT 6.1 SOL through NordRouter",
+  "engines": { "node": ">=22" },
+  "scripts": { "test": "node --test" },
+  "dependencies": { "@vercel/functions": "3.9.11" }
 }
