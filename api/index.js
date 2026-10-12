@@ -1,10 +1,12 @@
+import { getCache, waitUntil } from "@vercel/functions";
+import { createDeferredHandler } from "../lib/deferred.js";
 const DEFAULT_MODEL = "openai/gpt-6.1-sol";
 const MAX_HISTORY_MESSAGES = 8;
 const MAX_HISTORY_MESSAGE_CHARS = 1200;
 const MAX_ALICE_TEXT = 1024;
 const TOTAL_RESPONSE_BUDGET_MS = 4000;
 const SERPER_TIMEOUT_MS = 600;
-const NORDROUTER_TIMEOUT_MS = 3400;
+const NORDROUTER_TIMEOUT_MS = 45000;
 const SYSTEM_PROMPT = [
   "Ты — полезный голосовой помощник в навыке Яндекс Алисы.",
   "Отвечай естественно, по-русски, кратко и так, чтобы ответ было удобно слушать.",
@@ -99,7 +101,7 @@ function errorForUser(error) {
     default: return "Не получилось получить ответ от нейросети. Попробуйте ещё раз чуть позже.";
   }
 }
-export default async function handler(req, res) {
+async function syncHandler(req, res) {
   if (req.method === "GET") return res.status(200).json({ ok: true, service: "alice-nordrouter-gpt", model: String(process.env.NORDROUTER_MODEL || DEFAULT_MODEL).trim(), configured: Boolean(process.env.NORDROUTER_API_KEY?.trim()), message: "Webhook is ready. Yandex Dialogs should send POST requests to /api." });
   if (req.method !== "POST") { res.setHeader("Allow", "GET, POST"); return res.status(405).json({ error: "Method not allowed" }); }
   const startedAt = Date.now();
@@ -107,7 +109,7 @@ export default async function handler(req, res) {
   const body = req.body && typeof req.body === "object" ? req.body : {};
   const text = String(body?.request?.command || body?.request?.original_utterance || "").trim();
   const oldHistory = safeHistory(body?.state?.session?.history);
-  if (!text) return res.status(200).json(aliceResponse("Привет! Я могу ответить на вопрос или найти актуальную информацию. Что хочешь узнать?", false, oldHistory));
+  if (!text) return res.status(200).json(aliceResponse("Привет! Я Джарвис сан. Задай вопрос. Когда попрошу подождать, скажи через несколько секунд: готово?", false, oldHistory));
   try {
     let searchContext = "";
     if (isSearchIntent(text) && process.env.SERPER_API_KEY) searchContext = await searchWeb(text, Math.min(SERPER_TIMEOUT_MS, Math.max(0, remainingMs() - 2600)));
@@ -121,3 +123,12 @@ export default async function handler(req, res) {
   }
 }
 export { aliceResponse, fitAliceText, isSearchIntent, safeHistory };
+
+export default createDeferredHandler({
+  getCache, waitUntil, sync: syncHandler, reply: aliceResponse, history: safeHistory,
+  errorText: error => errorForUser(error?.name === "AbortError" ? new Error("TIME_BUDGET_EXHAUSTED") : error),
+  ask: async (text, history) => {
+    const context = isSearchIntent(text) && process.env.SERPER_API_KEY ? await searchWeb(text, 600) : "";
+    return askNordRouter(text, history, context, 45000);
+  }
+});
