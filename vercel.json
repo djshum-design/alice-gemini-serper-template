@@ -1,8 +1,5 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "functions": {
-    "api/index.js": {
-      "maxDuration": 10
-    }
-  }
+  "regions": ["fra1"],
+  "functions": { "api/index.js": { "maxDuration": 10 } }
 }
