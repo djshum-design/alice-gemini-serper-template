@@ -40,7 +40,7 @@ test("GPT request uses NordRouter auth, model and conversation history", async (
   const old = process.env.NORDROUTER_API_KEY;
   process.env.NORDROUTER_API_KEY = "test-key";
   t.mock.method(globalThis, "fetch", async (url, options) => {
-    assert.equal(url, "https://global-api.nordrouter.com/v1/chat/completions");
+    assert.equal(url, "https://nordrouter.com/v1/chat/completions");
     assert.equal(options.headers.Authorization, "Bearer test-key");
     const body = JSON.parse(options.body);
     assert.equal(body.model, "openai/gpt-6.1-sol"); assert.equal(body.messages[0].role, "system");
