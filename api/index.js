@@ -2,9 +2,9 @@ const DEFAULT_MODEL = "openai/gpt-6.1-sol";
 const MAX_HISTORY_MESSAGES = 8;
 const MAX_HISTORY_MESSAGE_CHARS = 1200;
 const MAX_ALICE_TEXT = 1024;
-const TOTAL_RESPONSE_BUDGET_MS = 16000;
+const TOTAL_RESPONSE_BUDGET_MS = 4000;
 const SERPER_TIMEOUT_MS = 600;
-const NORDROUTER_TIMEOUT_MS = 15000;
+const NORDROUTER_TIMEOUT_MS = 3400;
 const SYSTEM_PROMPT = [
   "Ты — полезный голосовой помощник в навыке Яндекс Алисы.",
   "Отвечай естественно, по-русски, кратко и так, чтобы ответ было удобно слушать.",
